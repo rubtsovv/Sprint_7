@@ -1,5 +1,6 @@
 package tests;
 
+import client.OrderClient;
 import io.qameta.allure.*;
 import io.restassured.RestAssured;
 import model.Order;
@@ -12,7 +13,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
 
 @Epic("Order API")
@@ -20,7 +20,10 @@ import static org.hamcrest.Matchers.notNullValue;
 @RunWith(Parameterized.class)
 public class OrderCreateTest {
 
+    private static final String BASE_URI = "https://qa-scooter.praktikum-services.ru";
+
     private final List<String> color;
+    private final OrderClient orderClient = new OrderClient();
 
     public OrderCreateTest(List<String> color) {
         this.color = color;
@@ -38,7 +41,7 @@ public class OrderCreateTest {
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru";
+        RestAssured.baseURI = BASE_URI;
     }
 
     @Test
@@ -52,11 +55,7 @@ public class OrderCreateTest {
                 "2025-05-20", "Пожалуйста, позвоните", color
         );
 
-        given()
-                .contentType("application/json")
-                .body(order)
-                .when()
-                .post("/api/v1/orders")
+        orderClient.createOrder(order)
                 .then()
                 .statusCode(201)
                 .body("track", notNullValue());
